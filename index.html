@@ -4,23 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cờ Caro 3x3</title>
+    <title>Cờ Caro 10x10</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        #gameContainer {
-            text-align: center;
+        h1 {
+            margin-bottom: 20px;
         }
+
+        #controls {
+            margin-bottom: 20px;
+        }
+
         #gameBoard {
             display: grid;
-            grid-template-columns: repeat(3, 100px);
+            grid-template-columns: repeat(10, 50px);
             gap: 2px;
             margin-bottom: 20px;
             position: relative;
@@ -28,14 +31,22 @@
         }
 
         .cell {
-            width: 100px;
-            height: 100px;
+            width: 50px;
+            height: 50px;
             border: 1px solid black;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 40px;
             cursor: pointer;
+        }
+
+        .cell.player-x {
+            color: red;
+        }
+
+        .cell.player-o {
+            color: blue;
         }
 
         .winning-line {
@@ -47,116 +58,174 @@
 </head>
 
 <body>
-    <div id="gameContainer">
-        <h1>Cờ Caro 3x3</h1>
-        <h1 id="gameResult" style="display: none;"></h1>
-        <div id="gameBoard"></div>
-        <p>Lượt của: <span id="currentPlayer">X</span></p>
-        <button id="resetButton">Chơi lại</button>
+    <h1>Cờ Caro 10x10</h1>
+    <div id="controls">
+        Người chơi: <b><span id="currentPlayer">X</span></b>
+        <button id="resetButton">⟳ Reset</button>
     </div>
+    <h2 id="status" style="color: red; font-size: 20px;display: block;">Lượt của bạn</h2>
+    <div id="gameBoard"></div>
     <script>
         const gameBoard = document.getElementById('gameBoard');
-        const currentPlayerElement = document.getElementById('currentPlayer');
+        const status = document.getElementById('status');
         const resetButton = document.getElementById('resetButton');
-        const boardSize = 3;
-        let currentPlayer = 'X';
+        const currentPlayerDisplay = document.getElementById('currentPlayer');
+
         let board = [];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let isComputerThinking = false;
+        const boardSize = 10;
+        const winLength = 5;
+        const MAX_DEPTH = 2; // Giảm từ 5 xuống 4
+
+        let winningLine = null;
 
         function createBoard() {
             gameBoard.innerHTML = '';
-            document.getElementById('gameResult').style.display = 'none';
             board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
-            currentPlayer = 'X';
-            currentPlayerElement.textContent = currentPlayer;
-
             for (let i = 0; i < boardSize; i++) {
                 for (let j = 0; j < boardSize; j++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
-                    cell.addEventListener('click', () => playerMove(i, j));
+                    cell.addEventListener('click', () => handleCellClick(i, j));
                     gameBoard.appendChild(cell);
                 }
             }
+            gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 50px)`;
         }
 
-        function playerMove(row, col) {
-            if (board[row][col] === '' && currentPlayer === 'X') {
-                makeMove(row, col);
-                if (!checkGameEnd()) {
-                    currentPlayer = 'O';
-                    currentPlayerElement.textContent = currentPlayer;
-                    setTimeout(computerMove, 500);
-                }
-            }
-        }
+        function handleCellClick(row, col) {
+            if (isComputerThinking || !gameActive || board[row][col] !== '') return;
 
-        function computerMove() {
-            const move = minimaxMove(board, 'O');
-            if (move) {
-                makeMove(move[0], move[1]);
-                if (!checkGameEnd()) {
-                    currentPlayer = 'X';
-                    currentPlayerElement.textContent = currentPlayer;
-                }
+            makeMove(row, col);
+
+            if (gameActive && currentPlayer === 'O') {
+                isComputerThinking = true;
+                let statusElement = document.getElementById('status');
+                statusElement.textContent = 'Máy tính đang suy nghĩ...';
+                setTimeout(computerMove, 100);
             }
         }
 
         function makeMove(row, col) {
             board[row][col] = currentPlayer;
-            const cell = gameBoard.children[row * boardSize + col];
-            cell.textContent = currentPlayer;
-            cell.style.color = currentPlayer === 'X' ? 'red' : 'blue';
+            updateCell(row, col);
+
+            if (checkWin(currentPlayer, row, col)) {
+                endGame(`${currentPlayer} thắng!`);
+            } else if (checkDraw()) {
+                endGame('Hòa!');
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                currentPlayerDisplay.textContent = currentPlayer;
+            }
         }
 
-        function minimaxMove(board, player) {
-            let bestScore = player === 'O' ? -Infinity : Infinity;
-            let bestMove;
+        function computerMove() {
+            console.log('Máy tính đang suy nghĩ...');
 
-            for (let i = 0; i < boardSize; i++) {
-                for (let j = 0; j < boardSize; j++) {
-                    if (board[i][j] === '') {
-                        board[i][j] = player;
-                        let score = minimax(board, 0, player === 'X');
-                        board[i][j] = '';
-                        if (player === 'O' ? score > bestScore : score < bestScore) {
-                            bestScore = score;
-                            bestMove = [i, j];
+            const startTime = Date.now();
+
+            const bestMove = findBestMove();
+
+            const endTime = Date.now();
+            console.log(`Máy tính mất ${endTime - startTime}ms để quyết định`);
+
+            if (bestMove && gameActive) {
+                setTimeout(() => {
+                    makeMove(bestMove.row, bestMove.col);
+                    isComputerThinking = false;
+                    let statusElement = document.getElementById('status');
+                    statusElement.textContent = 'Lượt của bạn';
+                }, 500);
+            } else {
+                isComputerThinking = false;
+                let statusElement = document.getElementById('status');
+                statusElement.textContent = 'Lượt của bạn';
+            }
+        }
+
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let bestMove;
+            let alpha = -Infinity;
+            let beta = Infinity;
+            let possibleMoves = getPossibleMoves();
+            for (let move of possibleMoves) {
+                let { row, col } = move;
+                board[row][col] = 'O';
+                let score = alphaBetaPruning(board, 0, false, alpha, beta);
+                board[row][col] = '';
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = { row, col };
+                }
+                alpha = Math.max(alpha, bestScore);
+                if (beta <= alpha) break;
+            }
+            return bestMove;
+        }
+
+        function getPossibleMoves() {
+            let moves = [];
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === '' && hasNeighbor(row, col)) {
+                        moves.push({ row, col });
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function hasNeighbor(row, col) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    let newRow = row + i;
+                    let newCol = col + j;
+                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
+                        if (board[newRow][newCol] !== '') {
+                            return true;
                         }
                     }
                 }
             }
-
-            return bestMove;
+            return false;
         }
 
-        function minimax(board, depth, isMaximizing) {
-            const result = checkWin();
-            if (result === 'X') return depth - 10;
-            if (result === 'O') return 10 - depth;
-            if (isBoardFull()) return 0;
+        function alphaBetaPruning(board, depth, isMaximizing, alpha, beta) {
+            if (checkWin('O')) return 100 - depth;
+            if (checkWin('X')) return depth - 100;
+            if (checkDraw()) return 0;
+            if (depth >= MAX_DEPTH) return evaluate(board);
 
             if (isMaximizing) {
                 let bestScore = -Infinity;
-                for (let i = 0; i < boardSize; i++) {
-                    for (let j = 0; j < boardSize; j++) {
-                        if (board[i][j] === '') {
-                            board[i][j] = 'O';
-                            let score = minimax(board, depth + 1, false);
-                            board[i][j] = '';
-                            bestScore = Math.max(bestScore, score);
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (board[row][col] === '') {
+                            board[row][col] = 'O';
+                            let score = alphaBetaPruning(board, depth + 1, false, alpha, beta);
+                            board[row][col] = '';
+                            bestScore = Math.max(score, bestScore);
+                            alpha = Math.max(alpha, bestScore);
+                            if (beta <= alpha) break;
                         }
                     }
                 }
                 return bestScore;
             } else {
                 let bestScore = Infinity;
-                for (let i = 0; i < boardSize; i++) {
-                    for (let j = 0; j < boardSize; j++) {
-                        if (board[i][j] === '') {
-                            board[i][j] = 'X';
-                            let score = minimax(board, depth + 1, true);
-                            board[i][j] = '';
-                            bestScore = Math.min(bestScore, score);
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (board[row][col] === '') {
+                            board[row][col] = 'X';
+                            let score = alphaBetaPruning(board, depth + 1, true, alpha, beta);
+                            board[row][col] = '';
+                            bestScore = Math.min(score, bestScore);
+                            beta = Math.min(beta, bestScore);
+                            if (beta <= alpha) break;
                         }
                     }
                 }
@@ -164,107 +233,173 @@
             }
         }
 
-        function checkGameEnd() {
-            const winner = checkWin();
-            if (winner) {
-                const winningLine = getWinningLine();
-                drawWinningLine(winningLine);
-                // showGameResult(winner === 'X' ? 'Bạn thắng!' : 'Bạn thua!');
-                let gameResult = winner === 'X' ? 'Bạn thắng!' : 'Bạn thua!';
-                let gameResultElement = document.getElementById('gameResult');
-                gameResultElement.textContent = gameResult;
-                gameResultElement.style.display = 'block';
-                gameResultElement.style.color = winner === 'X' ? 'green' : 'red';
-                return true;
-            } else if (isBoardFull()) {
-                // showGameResult('Hòa!');
-                let gameResult = 'Hòa!';
-                let gameResultElement = document.getElementById('gameResult');
-                gameResultElement.textContent = gameResult;
-                gameResultElement.style.display = 'block';
-                return true;
+        function evaluate(board) {
+            let score = 0;
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === 'O') {
+                        score += evaluatePosition(row, col, 'O');
+                    } else if (board[row][col] === 'X') {
+                        score -= evaluatePosition(row, col, 'X');
+                    }
+                }
+            }
+            return score;
+        }
+
+        function evaluatePosition(row, col, player) {
+            let score = 0;
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+            for (let [dx, dy] of directions) {
+                let count = 1;
+                let blocked = 0;
+                for (let i = 1; i < winLength; i++) {
+                    let newRow = row + i * dx;
+                    let newCol = col + i * dy;
+                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
+                        blocked++;
+                        break;
+                    }
+                    if (board[newRow][newCol] === player) {
+                        count++;
+                    } else if (board[newRow][newCol] !== '') {
+                        blocked++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                for (let i = 1; i < winLength; i++) {
+                    let newRow = row - i * dx;
+                    let newCol = col - i * dy;
+                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
+                        blocked++;
+                        break;
+                    }
+                    if (board[newRow][newCol] === player) {
+                        count++;
+                    } else if (board[newRow][newCol] !== '') {
+                        blocked++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                score += getScore(count, blocked);
+            }
+            return score;
+        }
+
+        function getScore(count, blocked) {
+            if (count >= winLength) return 10000;
+            if (blocked === 2) return 0;
+            switch (count) {
+                case 4: return blocked === 0 ? 1000 : 100;
+                case 3: return blocked === 0 ? 100 : 10;
+                case 2: return blocked === 0 ? 10 : 1;
+                default: return 1;
+            }
+        }
+
+        function updateCell(row, col) {
+            const cellIndex = row * boardSize + col;
+            const cell = document.querySelectorAll('.cell')[cellIndex];
+            cell.textContent = board[row][col];
+            cell.classList.add(board[row][col] === 'X' ? 'player-x' : 'player-o');
+        }
+
+        function checkWin(player) {
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === player) {
+                        for (let [dx, dy] of directions) {
+                            let count = 1;
+                            let line = [{ row, col }];
+                            for (let i = 1; i < winLength; i++) {
+                                let newRow = row + i * dx;
+                                let newCol = col + i * dy;
+                                if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) break;
+                                if (board[newRow][newCol] === player) {
+                                    count++;
+                                    line.push({ row: newRow, col: newCol });
+                                } else {
+                                    break;
+                                }
+                            }
+                            if (count === winLength) {
+                                winningLine = line;
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
             return false;
         }
 
-        function checkWin() {
-            const lines = [
-                [[0, 0], [0, 1], [0, 2]],
-                [[1, 0], [1, 1], [1, 2]],
-                [[2, 0], [2, 1], [2, 2]],
-                [[0, 0], [1, 0], [2, 0]],
-                [[0, 1], [1, 1], [2, 1]],
-                [[0, 2], [1, 2], [2, 2]],
-                [[0, 0], [1, 1], [2, 2]],
-                [[0, 2], [1, 1], [2, 0]]
-            ];
-
-            for (let line of lines) {
-                const [a, b, c] = line;
-                if (board[a[0]][a[1]] && board[a[0]][a[1]] === board[b[0]][b[1]] && board[a[0]][a[1]] === board[c[0]][c[1]]) {
-                    return board[a[0]][a[1]];
-                }
-            }
-            return null;
-        }
-
-        function getWinningLine() {
-            const lines = [
-                [[0, 0], [0, 1], [0, 2]],
-                [[1, 0], [1, 1], [1, 2]],
-                [[2, 0], [2, 1], [2, 2]],
-                [[0, 0], [1, 0], [2, 0]],
-                [[0, 1], [1, 1], [2, 1]],
-                [[0, 2], [1, 2], [2, 2]],
-                [[0, 0], [1, 1], [2, 2]],
-                [[0, 2], [1, 1], [2, 0]]
-            ];
-
-            for (let line of lines) {
-                const [a, b, c] = line;
-                if (board[a[0]][a[1]] && board[a[0]][a[1]] === board[b[0]][b[1]] && board[a[0]][a[1]] === board[c[0]][c[1]]) {
-                    return line;
-                }
-            }
-            return null;
-        }
-
-        function drawWinningLine(line) {
-            const [start, _, end] = line;
-            const startCell = gameBoard.children[start[0] * boardSize + start[1]];
-            const endCell = gameBoard.children[end[0] * boardSize + end[1]];
-
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("width", "100%");
-            svg.setAttribute("height", "100%");
-            svg.style.position = "absolute";
-            svg.style.top = "0";
-            svg.style.left = "0";
-            svg.style.pointerEvents = "none";
-
-            const winLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            winLine.setAttribute("x1", startCell.offsetLeft + startCell.offsetWidth / 2);
-            winLine.setAttribute("y1", startCell.offsetTop + startCell.offsetHeight / 2);
-            winLine.setAttribute("x2", endCell.offsetLeft + endCell.offsetWidth / 2);
-            winLine.setAttribute("y2", endCell.offsetTop + endCell.offsetHeight / 2);
-            winLine.setAttribute("stroke", "limegreen");
-            winLine.setAttribute("stroke-width", "5");
-
-            svg.appendChild(winLine);
-            gameBoard.appendChild(svg);
-        }
-
-        function isBoardFull() {
+        function checkDraw() {
             return board.every(row => row.every(cell => cell !== ''));
         }
 
-        function showGameResult(message) {
-            alert(message);
+        function endGame(message) {
+            gameActive = false;
+            status.textContent = message;
+            drawWinningLine();
         }
 
-        resetButton.addEventListener('click', createBoard);
+        function resetGame() {
+            board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
+            currentPlayer = 'X';
+            gameActive = true;
+            isComputerThinking = false;
+            status.textContent = '';
+            currentPlayerDisplay.textContent = currentPlayer;
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('player-x', 'player-o');
+            });
+            if (winningLine) {
+                const line = document.querySelector('.winning-line');
+                if (line) line.remove();
+                winningLine = null;
+            }
+        }
 
-        createBoard();
+        function drawWinningLine() {
+            if (!winningLine) return;
+            const start = winningLine[0];
+            const end = winningLine[winningLine.length - 1];
+            const line = document.createElement('div');
+            line.classList.add('winning-line');
+            const startCell = document.querySelectorAll('.cell')[start.row * boardSize + start.col];
+            const endCell = document.querySelectorAll('.cell')[end.row * boardSize + end.col];
+            const startRect = startCell.getBoundingClientRect();
+            const endRect = endCell.getBoundingClientRect();
+            const gameboardRect = gameBoard.getBoundingClientRect();
+            const length = Math.sqrt(Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2));
+            const angle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left);
+            line.style.width = `${length}px`;
+            line.style.height = '4px';
+            line.style.left = `${startRect.left + startRect.width / 2 - gameboardRect.left}px`;
+            line.style.top = `${startRect.top + startRect.height / 2 - gameboardRect.top}px`;
+            line.style.transform = `rotate(${angle}rad)`;
+            line.style.transformOrigin = 'top left';
+            line.style.position = 'absolute';
+            gameBoard.appendChild(line);
+        }
+
+        // Ensure you have a reset button in your HTML
+        document.getElementById('resetButton').addEventListener('click', resetGame);
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            createBoard();
+        });
     </script>
 </body>
 
