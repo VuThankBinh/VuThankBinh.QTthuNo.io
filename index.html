@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cờ Caro 3x3</title>
     <style>
-         body {
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -14,15 +14,19 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
         #gameContainer {
             text-align: center;
         }
         #gameBoard {
             display: grid;
             grid-template-columns: repeat(3, 100px);
-            gap: 5px;
+            gap: 2px;
             margin-bottom: 20px;
+            position: relative;
+            padding: 2px;
         }
+
         .cell {
             width: 100px;
             height: 100px;
@@ -33,9 +37,11 @@
             font-size: 40px;
             cursor: pointer;
         }
-        #resetButton {
-            font-size: 16px;
-            padding: 10px 20px;
+
+        .winning-line {
+            position: absolute;
+            background-color: green;
+            z-index: 1;
         }
     </style>
 </head>
@@ -58,6 +64,7 @@
 
         function createBoard() {
             gameBoard.innerHTML = '';
+            document.getElementById('gameResult').style.display = 'none';
             board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
             currentPlayer = 'X';
             currentPlayerElement.textContent = currentPlayer;
