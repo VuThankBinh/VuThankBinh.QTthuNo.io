@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cờ Caro 10x10</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #controls {
+            margin-bottom: 20px;
+        }
+
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            gap: 2px;
+            margin-bottom: 20px;
+            position: relative;
+            padding: 2px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            cursor: pointer;
+        }
+
+        .cell.player-x {
+            color: red;
+        }
+
+        .cell.player-o {
+            color: blue;
+        }
+
+        .winning-line {
+            position: absolute;
+            background-color: green;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cờ Caro 10x10</h1>
+    <div id="controls">
+        Người chơi: <b><span id="currentPlayer">X</span></b>
+        <button id="resetButton">⟳ Reset</button>
+    </div>
+    <h2 id="status" style="color: red; font-size: 20px;display: block;">Lượt của bạn</h2>
+    <div id="gameBoard"></div>
+    <script>
+        const gameBoard = document.getElementById('gameBoard');
+        const status = document.getElementById('status');
+        const resetButton = document.getElementById('resetButton');
+        const currentPlayerDisplay = document.getElementById('currentPlayer');
+
+        let board = [];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let isComputerThinking = false;
+        const boardSize = 10;
+        const winLength = 5;
+        const MAX_DEPTH = 2; // Giảm từ 5 xuống 4
+
+        let winningLine = null;
+
+        function createBoard() {
+            gameBoard.innerHTML = '';
+            board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
+            for (let i = 0; i < boardSize; i++) {
+                for (let j = 0; j < boardSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.addEventListener('click', () => handleCellClick(i, j));
+                    gameBoard.appendChild(cell);
+                }
+            }
+            gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 50px)`;
+        }
+
+        function handleCellClick(row, col) {
+            if (isComputerThinking || !gameActive || board[row][col] !== '') return;
+
+            makeMove(row, col);
+
+            if (gameActive && currentPlayer === 'O') {
+                isComputerThinking = true;
+                let statusElement = document.getElementById('status');
+                statusElement.textContent = 'Máy tính đang suy nghĩ...';
+                setTimeout(computerMove, 100);
+            }
+        }
+
+        function makeMove(row, col) {
+            board[row][col] = currentPlayer;
+            updateCell(row, col);
+
+            if (checkWin(currentPlayer, row, col)) {
+                endGame(`${currentPlayer} thắng!`);
+            } else if (checkDraw()) {
+                endGame('Hòa!');
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                currentPlayerDisplay.textContent = currentPlayer;
+            }
+        }
+
+        function computerMove() {
+            console.log('Máy tính đang suy nghĩ...');
+
+            const startTime = Date.now();
+
+            const bestMove = findBestMove();
+
+            const endTime = Date.now();
+            console.log(`Máy tính mất ${endTime - startTime}ms để quyết định`);
+
+            if (bestMove && gameActive) {
+                setTimeout(() => {
+                    makeMove(bestMove.row, bestMove.col);
+                    isComputerThinking = false;
+                    let statusElement = document.getElementById('status');
+                    statusElement.textContent = 'Lượt của bạn';
+                }, 500);
+            } else {
+                isComputerThinking = false;
+                let statusElement = document.getElementById('status');
+                statusElement.textContent = 'Lượt của bạn';
+            }
+        }
+
+        function findBestMove() {
+            let bestScore = -Infinity;
+            let bestMove;
+            let alpha = -Infinity;
+            let beta = Infinity;
+            let possibleMoves = getPossibleMoves();
+            for (let move of possibleMoves) {
+                let { row, col } = move;
+                board[row][col] = 'O';
+                let score = alphaBetaPruning(board, 0, false, alpha, beta);
+                board[row][col] = '';
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = { row, col };
+                }
+                alpha = Math.max(alpha, bestScore);
+                if (beta <= alpha) break;
+            }
+            return bestMove;
+        }
+
+        function getPossibleMoves() {
+            let moves = [];
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === '' && hasNeighbor(row, col)) {
+                        moves.push({ row, col });
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function hasNeighbor(row, col) {
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    let newRow = row + i;
+                    let newCol = col + j;
+                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
+                        if (board[newRow][newCol] !== '') {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function alphaBetaPruning(board, depth, isMaximizing, alpha, beta) {
+            if (checkWin('O')) return 100 - depth;
+            if (checkWin('X')) return depth - 100;
+            if (checkDraw()) return 0;
+            if (depth >= MAX_DEPTH) return evaluate(board);
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (board[row][col] === '') {
+                            board[row][col] = 'O';
+                            let score = alphaBetaPruning(board, depth + 1, false, alpha, beta);
+                            board[row][col] = '';
+                            bestScore = Math.max(score, bestScore);
+                            alpha = Math.max(alpha, bestScore);
+                            if (beta <= alpha) break;
+                        }
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (board[row][col] === '') {
+                            board[row][col] = 'X';
+                            let score = alphaBetaPruning(board, depth + 1, true, alpha, beta);
+                            board[row][col] = '';
+                            bestScore = Math.min(score, bestScore);
+                            beta = Math.min(beta, bestScore);
+                            if (beta <= alpha) break;
+                        }
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function evaluate(board) {
+            let score = 0;
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === 'O') {
+                        score += evaluatePosition(row, col, 'O');
+                    } else if (board[row][col] === 'X') {
+                        score -= evaluatePosition(row, col, 'X');
+                    }
+                }
+            }
+            return score;
+        }
+
+        function evaluatePosition(row, col, player) {
+            let score = 0;
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+            for (let [dx, dy] of directions) {
+                let count = 1;
+                let blocked = 0;
+                for (let i = 1; i < winLength; i++) {
+                    let newRow = row + i * dx;
+                    let newCol = col + i * dy;
+                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
+                        blocked++;
+                        break;
+                    }
+                    if (board[newRow][newCol] === player) {
+                        count++;
+                    } else if (board[newRow][newCol] !== '') {
+                        blocked++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                for (let i = 1; i < winLength; i++) {
+                    let newRow = row - i * dx;
+                    let newCol = col - i * dy;
+                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
+                        blocked++;
+                        break;
+                    }
+                    if (board[newRow][newCol] === player) {
+                        count++;
+                    } else if (board[newRow][newCol] !== '') {
+                        blocked++;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                score += getScore(count, blocked);
+            }
+            return score;
+        }
+
+        function getScore(count, blocked) {
+            if (count >= winLength) return 10000;
+            if (blocked === 2) return 0;
+            switch (count) {
+                case 4: return blocked === 0 ? 1000 : 100;
+                case 3: return blocked === 0 ? 100 : 10;
+                case 2: return blocked === 0 ? 10 : 1;
+                default: return 1;
+            }
+        }
+
+        function updateCell(row, col) {
+            const cellIndex = row * boardSize + col;
+            const cell = document.querySelectorAll('.cell')[cellIndex];
+            cell.textContent = board[row][col];
+            cell.classList.add(board[row][col] === 'X' ? 'player-x' : 'player-o');
+        }
+
+        function checkWin(player) {
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (board[row][col] === player) {
+                        for (let [dx, dy] of directions) {
+                            let count = 1;
+                            let line = [{ row, col }];
+                            for (let i = 1; i < winLength; i++) {
+                                let newRow = row + i * dx;
+                                let newCol = col + i * dy;
+                                if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) break;
+                                if (board[newRow][newCol] === player) {
+                                    count++;
+                                    line.push({ row: newRow, col: newCol });
+                                } else {
+                                    break;
+                                }
+                            }
+                            if (count === winLength) {
+                                winningLine = line;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function checkDraw() {
+            return board.every(row => row.every(cell => cell !== ''));
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            status.textContent = message;
+            drawWinningLine();
+        }
+
+        function resetGame() {
+            board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
+            currentPlayer = 'X';
+            gameActive = true;
+            isComputerThinking = false;
+            status.textContent = '';
+            currentPlayerDisplay.textContent = currentPlayer;
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('player-x', 'player-o');
+            });
+            if (winningLine) {
+                const line = document.querySelector('.winning-line');
+                if (line) line.remove();
+                winningLine = null;
+            }
+        }
+
+        function drawWinningLine() {
+            if (!winningLine) return;
+            const start = winningLine[0];
+            const end = winningLine[winningLine.length - 1];
+            const line = document.createElement('div');
+            line.classList.add('winning-line');
+            const startCell = document.querySelectorAll('.cell')[start.row * boardSize + start.col];
+            const endCell = document.querySelectorAll('.cell')[end.row * boardSize + end.col];
+            const startRect = startCell.getBoundingClientRect();
+            const endRect = endCell.getBoundingClientRect();
+            const gameboardRect = gameBoard.getBoundingClientRect();
+            const length = Math.sqrt(Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2));
+            const angle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left);
+            line.style.width = `${length}px`;
+            line.style.height = '4px';
+            line.style.left = `${startRect.left + startRect.width / 2 - gameboardRect.left}px`;
+            line.style.top = `${startRect.top + startRect.height / 2 - gameboardRect.top}px`;
+            line.style.transform = `rotate(${angle}rad)`;
+            line.style.transformOrigin = 'top left';
+            line.style.position = 'absolute';
+            gameBoard.appendChild(line);
+        }
+
+        // Ensure you have a reset button in your HTML
+        document.getElementById('resetButton').addEventListener('click', resetGame);
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            createBoard();
+        });
+    </script>
+</body>
+
+</html>
