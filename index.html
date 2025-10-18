@@ -4,403 +4,852 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cờ Caro 10x10</title>
+    <title>Hệ thống Quản lý Thu nợ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            box-sizing: border-box;
         }
 
-        h1 {
-            margin-bottom: 20px;
+        .sidebar-transition {
+            transition: all 0.3s ease;
         }
 
-        #controls {
-            margin-bottom: 20px;
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        #gameBoard {
-            display: grid;
-            grid-template-columns: repeat(10, 50px);
-            gap: 2px;
-            margin-bottom: 20px;
-            position: relative;
-            padding: 2px;
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        .cell {
-            width: 50px;
-            height: 50px;
-            border: 1px solid black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 40px;
-            cursor: pointer;
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .cell.player-x {
-            color: red;
+        .status-overdue {
+            background: #fee2e2;
+            color: #dc2626;
         }
 
-        .cell.player-o {
-            color: blue;
+        .status-warning {
+            background: #fef3c7;
+            color: #d97706;
         }
 
-        .winning-line {
-            position: absolute;
-            background-color: green;
-            z-index: 1;
+        .status-normal {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #2563eb;
         }
     </style>
 </head>
 
-<body>
-    <h1>Cờ Caro 10x10</h1>
-    <div id="controls">
-        Người chơi: <b><span id="currentPlayer">X</span></b>
-        <button id="resetButton">⟳ Reset</button>
+<body class="bg-gray-50 h-full">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed w-full top-0 z-50">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" class="text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h1 class="text-2xl font-bold text-gray-900">Quản lý Thu nợ</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="text-gray-600 hover:text-gray-900 relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span
+                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%234F46E5'/%3E%3Ctext x='16' y='21' text-anchor='middle' fill='white' font-family='Arial' font-size='14' font-weight='bold'%3EAD%3C/text%3E%3C/svg%3E"
+                        alt="Avatar" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium text-gray-700">Admin User</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-full pt-16">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="bg-white w-64 shadow-lg sidebar-transition fixed h-full z-40">
+            <nav class="mt-6">
+                <div class="px-4 space-y-2">
+                    <a href="#" onclick="showSection('dashboard')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-chart-dashboard w-5 h-5 mr-3"></i>
+                        <span>Dashboard & Báo cáo</span>
+                    </a>
+                    <a href="#" onclick="showSection('loans')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-calendar-exclamation w-5 h-5 mr-3"></i>
+                        <span>Khoản vay đến hạn</span>
+                    </a>
+                    <a href="#" onclick="showSection('details')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-file-invoice-dollar w-5 h-5 mr-3"></i>
+                        <span>Chi tiết & Nhắc nợ</span>
+                    </a>
+                    <div class="relative">
+                        <a href="#" onclick="toggleSubmenu('settlement')"
+                            class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                            <i class="fas fa-hand-holding-dollar w-5 h-5 mr-3"></i>
+                            <span>Tất toán bắt buộc</span>
+                            <i class="fas fa-chevron-down ml-auto text-sm"></i>
+                        </a>
+                        <div id="settlement-submenu" class="hidden ml-8 mt-2 space-y-1">
+                            <a href="#" onclick="showSection('approval')"
+                                class="block px-4 py-2 text-sm text-gray-600 hover:text-indigo-700">Phê duyệt tất
+                                toán</a>
+                            <a href="#" onclick="showSection('debit-failed')"
+                                class="block px-4 py-2 text-sm text-gray-600 hover:text-indigo-700">Xử lý debit thất
+                                bại</a>
+                            <a href="#" onclick="showSection('transaction-log')"
+                                class="block px-4 py-2 text-sm text-gray-600 hover:text-indigo-700">Nhật ký giao
+                                dịch</a>
+                        </div>
+                    </div>
+                    <a href="#" onclick="showSection('tickets')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-ticket w-5 h-5 mr-3"></i>
+                        <span>Ticket & Xử lý lỗi</span>
+                    </a>
+                    <a href="#" onclick="showSection('config')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-cogs w-5 h-5 mr-3"></i>
+                        <span>Cấu hình hệ thống</span>
+                    </a>
+                    <a href="#" onclick="showSection('permissions')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-shield-alt w-5 h-5 mr-3"></i>
+                        <span>Phân quyền & Audit</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="mainContent" class="flex-1 ml-64 p-6 sidebar-transition">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Dashboard & Báo cáo</h2>
+                    <p class="text-gray-600">Tổng quan tình hình thu nợ và các chỉ số quan trọng</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Tổng nợ đến hạn </p>
+                                <p class="text-2xl font-bold text-red-600">2.5 tỷ VNĐ</p>
+                            </div>
+                            <div class="bg-red-100 p-3 rounded-full">
+                                <i class="fas fa-exclamation-triangle text-red-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Khoản vay đến hạn</p>
+                                <p class="text-2xl font-bold text-orange-600">1,234</p>
+                            </div>
+                            <div class="bg-orange-100 p-3 rounded-full">
+                                <i class="fas fa-clock text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Tỷ lệ thu hồi</p>
+                                <p class="text-2xl font-bold text-green-600">78.5%</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <i class="fas fa-chart-line text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Ticket chưa xử lý</p>
+                                <p class="text-2xl font-bold text-blue-600">45</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <i class="fas fa-ticket text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Xu hướng thu nợ theo tháng</h3>
+                        <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-chart-area text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Biểu đồ xu hướng thu nợ</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Phân bố theo độ tuổi nợ</h3>
+                        <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-chart-pie text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500">Biểu đồ phân bố nợ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Báo cáo chi tiết</h3>
+                        <div class="flex gap-3">
+                            <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="fas fa-file-excel mr-2"></i>Export Excel
+                            </button>
+                            <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-file-pdf mr-2"></i>Export PDF
+                            </button>
+                            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-cog mr-2"></i>Tùy chỉnh báo cáo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Filters -->
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Loại báo cáo</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Báo cáo tổng hợp</option>
+                                <option>Báo cáo theo collector</option>
+                                <option>Báo cáo theo khu vực</option>
+                                <option>Báo cáo hiệu suất</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kỳ báo cáo</label>
+                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Hôm nay</option>
+                                <option>Tuần này</option>
+                                <option>Tháng này</option>
+                                <option>Quý này</option>
+                                <option>Năm này</option>
+                                <option>Tùy chỉnh</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
+                            <input type="date" value="2024-12-01" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
+                            <input type="date" value="2024-12-31" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Tạo báo cáo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Report Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Tổng số khoản vay</p>
+                                    <p class="text-2xl font-bold text-gray-900 mt-1">1,234</p>
+                                    <p class="text-xs text-green-600 mt-1">
+                                        <i class="fas fa-arrow-up"></i> +5.2% so với tháng trước
+                                    </p>
+                                </div>
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-file-invoice text-blue-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Tổng số tiền thu</p>
+                                    <p class="text-2xl font-bold text-green-600 mt-1">1.8 tỷ</p>
+                                    <p class="text-xs text-green-600 mt-1">
+                                        <i class="fas fa-arrow-up"></i> +12.5%
+                                    </p>
+                                </div>
+                                <div class="bg-green-100 p-3 rounded-full">
+                                    <i class="fas fa-dollar-sign text-green-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Số cuộc gọi</p>
+                                    <p class="text-2xl font-bold text-gray-900 mt-1">3,456</p>
+                                    <p class="text-xs text-red-600 mt-1">
+                                        <i class="fas fa-arrow-down"></i> -2.3%
+                                    </p>
+                                </div>
+                                <div class="bg-orange-100 p-3 rounded-full">
+                                    <i class="fas fa-phone text-orange-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600">Hiệu suất trung bình</p>
+                                    <p class="text-2xl font-bold text-gray-900 mt-1">85.3%</p>
+                                    <p class="text-xs text-green-600 mt-1">
+                                        <i class="fas fa-arrow-up"></i> +3.1%
+                                    </p>
+                                </div>
+                                <div class="bg-purple-100 p-3 rounded-full">
+                                    <i class="fas fa-chart-line text-purple-600"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Collector
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Số khoản được giao
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Số khoản thu hồi
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tổng tiền thu
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Số cuộc gọi
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tỷ lệ thành công
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Hiệu suất
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
+                                                    CA
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Collector A</div>
+                                                <div class="text-sm text-gray-500">collector.a@company.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">145</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">123</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">450,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">892</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-semibold text-gray-900">84.8%</span>
+                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 84.8%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            Xuất sắc
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold">
+                                                    CB
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Collector B</div>
+                                                <div class="text-sm text-gray-500">collector.b@company.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">132</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">98</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">380,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">756</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-semibold text-gray-900">74.2%</span>
+                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 74.2%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Tốt
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-semibold">
+                                                    CC
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Collector C</div>
+                                                <div class="text-sm text-gray-500">collector.c@company.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">128</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">89</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">320,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">684</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-sm font-semibold text-gray-900">69.5%</span>
+                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-orange-500 h-2 rounded-full" style="width: 69.5%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
+                                            Trung bình
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-gray-50 font-semibold">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <i class="fas fa-calculator mr-2"></i>TỔNG CỘNG
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">405</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">310</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">1,150,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,332</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">76.5%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                            Trung bình
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Chart Section in Report -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-900 mb-3">Hiệu suất theo Collector</h4>
+                            <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-bar text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500">Biểu đồ cột so sánh hiệu suất</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-900 mb-3">Tỷ lệ thu hồi theo khu vực</h4>
+                            <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                                <div class="text-center">
+                                    <i class="fas fa-map-marked-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500">Bản đồ nhiệt khu vực</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loans Section -->
+            <div id="loans" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Quản lý Khoản vay đến hạn</h2>
+                    <p class="text-gray-600">Danh sách các khoản vay sắp đến hạn và quá hạn thanh toán</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                            <select
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option>Tất cả</option>
+                                <option>Đến hạn</option>
+                                <option>Sắp đến hạn</option>
+                                <option>Đang xử lý</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
+                            <input type="date"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
+                            <input type="date"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button
+                                class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loans Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Danh sách khoản vay</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Mã KH</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Tên khách hàng</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Số tiền nợ</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Ngày đến hạn</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Trạng thái</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">KH001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Nguyễn Văn A</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">50,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15/12/2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full status-overdue">Quá
+                                            hạn</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3">Chi tiết</button>
+                                        <button class="text-green-600 hover:text-green-900">Nhắc nợ</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">KH002</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Trần Thị B</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">30,000,000 VNĐ</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">20/12/2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full status-warning">Sắp
+                                            đến hạn</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button class="text-indigo-600 hover:text-indigo-900 mr-3">Chi tiết</button>
+                                        <button class="text-green-600 hover:text-green-900">Nhắc nợ</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div id="details" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Chi tiết Khoản vay & Nhắc nợ</h2>
+                    <p class="text-gray-600">Thông tin chi tiết và lịch sử nhắc nợ khách hàng</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Customer Info -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Thông tin khách hàng</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Mã KH:</span>
+                                    <span class="font-medium">KH001</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Tên:</span>
+                                    <span class="font-medium">Nguyễn Văn A</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">SĐT:</span>
+                                    <span class="font-medium">0901234567</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Email:</span>
+                                    <span class="font-medium">nguyenvana@email.com</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Địa chỉ:</span>
+                                    <span class="font-medium text-right">123 Đường ABC, Quận 1, TP.HCM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loan Info -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Thông tin khoản vay</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Số tiền gốc:</span>
+                                    <span class="font-medium">100,000,000 VNĐ</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Số tiền nợ:</span>
+                                    <span class="font-medium text-red-600">50,000,000 VNĐ</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Lãi suất:</span>
+                                    <span class="font-medium">12%/năm</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Ngày vay:</span>
+                                    <span class="font-medium">01/01/2024</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Ngày đến hạn:</span>
+                                    <span class="font-medium text-red-600">15/12/2024</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reminder History -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Lịch sử nhắc nợ</h3>
+                                <button
+                                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Tạo nhắc nợ mới
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-red-500 pl-4 py-3 bg-red-50 rounded-r-lg">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Nhắc nợ qua SMS</p>
+                                            <p class="text-sm text-gray-600 mt-1">Gửi tin nhắn nhắc nhở thanh toán khoản
+                                                nợ quá hạn</p>
+                                            <p class="text-xs text-gray-500 mt-2">Người thực hiện: Admin User</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium text-gray-900">16/12/2024 09:30</span>
+                                            <p class="text-xs text-green-600 mt-1">Đã gửi thành công</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r-lg">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium text-gray-900">Gọi điện nhắc nợ</p>
+                                            <p class="text-sm text-gray-600 mt-1">Liên hệ trực tiếp với khách hàng qua
+                                                điện thoại</p>
+                                            <p class="text-xs text-gray-500 mt-2">Người thực hiện: Collector A</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-sm font-medium text-gray-900">14/12/2024 14:15</span>
+                                            <p class="text-xs text-green-600 mt-1">Khách hàng hứa trả trong 3 ngày</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Create Reminder Form -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 mt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Tạo nhắc nợ mới</h3>
+                            <form class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Loại nhắc nợ</label>
+                                    <select
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option>SMS</option>
+                                        <option>Email</option>
+                                        <option>Gọi điện</option>
+                                        <option>Thư giấy</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nội dung</label>
+                                    <textarea rows="3"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="Nhập nội dung nhắc nợ..."></textarea>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button type="submit"
+                                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                        Gửi nhắc nợ
+                                    </button>
+                                    <button type="button"
+                                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                                        Hủy
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other sections would be implemented similarly -->
+            <div id="approval" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Phê duyệt Tất toán</h2>
+                    <p class="text-gray-600">Xử lý các yêu cầu tất toán bắt buộc từ khách hàng</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng phê duyệt tất toán đang được phát triển...</p>
+                </div>
+            </div>
+
+            <div id="debit-failed" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Xử lý Debit thất bại</h2>
+                    <p class="text-gray-600">Quản lý các giao dịch debit không thành công</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng xử lý debit thất bại đang được phát triển...</p>
+                </div>
+            </div>
+
+            <div id="transaction-log" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Nhật ký Giao dịch</h2>
+                    <p class="text-gray-600">Theo dõi lịch sử các giao dịch tất toán</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng nhật ký giao dịch đang được phát triển...</p>
+                </div>
+            </div>
+
+            <div id="tickets" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Ticket & Xử lý lỗi</h2>
+                    <p class="text-gray-600">Quản lý các ticket hỗ trợ và xử lý lỗi hệ thống</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng quản lý ticket đang được phát triển...</p>
+                </div>
+            </div>
+
+            <div id="config" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Cấu hình Hệ thống</h2>
+                    <p class="text-gray-600">Thiết lập job, rule và API cho hệ thống</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng cấu hình hệ thống đang được phát triển...</p>
+                </div>
+            </div>
+
+            <div id="permissions" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Phân quyền & Nhật ký Audit</h2>
+                    <p class="text-gray-600">Quản lý quyền truy cập và theo dõi hoạt động hệ thống</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <p class="text-gray-500 text-center py-8">Chức năng phân quyền và audit đang được phát triển...</p>
+                </div>
+            </div>
+        </main>
     </div>
-    <h2 id="status" style="color: red; font-size: 20px;display: block;">Lượt của bạn</h2>
-    <div id="gameBoard"></div>
+
     <script>
-        const gameBoard = document.getElementById('gameBoard');
-        const status = document.getElementById('status');
-        const resetButton = document.getElementById('resetButton');
-        const currentPlayerDisplay = document.getElementById('currentPlayer');
+        // Sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
 
-        let board = [];
-        let currentPlayer = 'X';
-        let gameActive = true;
-        let isComputerThinking = false;
-        const boardSize = 10;
-        const winLength = 5;
-        const MAX_DEPTH = 2; // Giảm từ 5 xuống 4
-
-        let winningLine = null;
-
-        function createBoard() {
-            gameBoard.innerHTML = '';
-            board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
-            for (let i = 0; i < boardSize; i++) {
-                for (let j = 0; j < boardSize; j++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    cell.addEventListener('click', () => handleCellClick(i, j));
-                    gameBoard.appendChild(cell);
-                }
-            }
-            gameBoard.style.gridTemplateColumns = `repeat(${boardSize}, 50px)`;
-        }
-
-        function handleCellClick(row, col) {
-            if (isComputerThinking || !gameActive || board[row][col] !== '') return;
-
-            makeMove(row, col);
-
-            if (gameActive && currentPlayer === 'O') {
-                isComputerThinking = true;
-                let statusElement = document.getElementById('status');
-                statusElement.textContent = 'Máy tính đang suy nghĩ...';
-                setTimeout(computerMove, 100);
-            }
-        }
-
-        function makeMove(row, col) {
-            board[row][col] = currentPlayer;
-            updateCell(row, col);
-
-            if (checkWin(currentPlayer, row, col)) {
-                endGame(`${currentPlayer} thắng!`);
-            } else if (checkDraw()) {
-                endGame('Hòa!');
+            sidebar.classList.toggle('-translate-x-full');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-0');
             } else {
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                currentPlayerDisplay.textContent = currentPlayer;
+                mainContent.classList.remove('ml-0');
+                mainContent.classList.add('ml-64');
             }
-        }
+        });
 
-        function computerMove() {
-            console.log('Máy tính đang suy nghĩ...');
-
-            const startTime = Date.now();
-
-            const bestMove = findBestMove();
-
-            const endTime = Date.now();
-            console.log(`Máy tính mất ${endTime - startTime}ms để quyết định`);
-
-            if (bestMove && gameActive) {
-                setTimeout(() => {
-                    makeMove(bestMove.row, bestMove.col);
-                    isComputerThinking = false;
-                    let statusElement = document.getElementById('status');
-                    statusElement.textContent = 'Lượt của bạn';
-                }, 500);
-            } else {
-                isComputerThinking = false;
-                let statusElement = document.getElementById('status');
-                statusElement.textContent = 'Lượt của bạn';
-            }
-        }
-
-        function findBestMove() {
-            let bestScore = -Infinity;
-            let bestMove;
-            let alpha = -Infinity;
-            let beta = Infinity;
-            let possibleMoves = getPossibleMoves();
-            for (let move of possibleMoves) {
-                let { row, col } = move;
-                board[row][col] = 'O';
-                let score = alphaBetaPruning(board, 0, false, alpha, beta);
-                board[row][col] = '';
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = { row, col };
-                }
-                alpha = Math.max(alpha, bestScore);
-                if (beta <= alpha) break;
-            }
-            return bestMove;
-        }
-
-        function getPossibleMoves() {
-            let moves = [];
-            for (let row = 0; row < boardSize; row++) {
-                for (let col = 0; col < boardSize; col++) {
-                    if (board[row][col] === '' && hasNeighbor(row, col)) {
-                        moves.push({ row, col });
-                    }
-                }
-            }
-            return moves;
-        }
-
-        function hasNeighbor(row, col) {
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    let newRow = row + i;
-                    let newCol = col + j;
-                    if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
-                        if (board[newRow][newCol] !== '') {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        function alphaBetaPruning(board, depth, isMaximizing, alpha, beta) {
-            if (checkWin('O')) return 100 - depth;
-            if (checkWin('X')) return depth - 100;
-            if (checkDraw()) return 0;
-            if (depth >= MAX_DEPTH) return evaluate(board);
-
-            if (isMaximizing) {
-                let bestScore = -Infinity;
-                for (let row = 0; row < boardSize; row++) {
-                    for (let col = 0; col < boardSize; col++) {
-                        if (board[row][col] === '') {
-                            board[row][col] = 'O';
-                            let score = alphaBetaPruning(board, depth + 1, false, alpha, beta);
-                            board[row][col] = '';
-                            bestScore = Math.max(score, bestScore);
-                            alpha = Math.max(alpha, bestScore);
-                            if (beta <= alpha) break;
-                        }
-                    }
-                }
-                return bestScore;
-            } else {
-                let bestScore = Infinity;
-                for (let row = 0; row < boardSize; row++) {
-                    for (let col = 0; col < boardSize; col++) {
-                        if (board[row][col] === '') {
-                            board[row][col] = 'X';
-                            let score = alphaBetaPruning(board, depth + 1, true, alpha, beta);
-                            board[row][col] = '';
-                            bestScore = Math.min(score, bestScore);
-                            beta = Math.min(beta, bestScore);
-                            if (beta <= alpha) break;
-                        }
-                    }
-                }
-                return bestScore;
-            }
-        }
-
-        function evaluate(board) {
-            let score = 0;
-            for (let row = 0; row < boardSize; row++) {
-                for (let col = 0; col < boardSize; col++) {
-                    if (board[row][col] === 'O') {
-                        score += evaluatePosition(row, col, 'O');
-                    } else if (board[row][col] === 'X') {
-                        score -= evaluatePosition(row, col, 'X');
-                    }
-                }
-            }
-            return score;
-        }
-
-        function evaluatePosition(row, col, player) {
-            let score = 0;
-            const directions = [
-                [0, 1], [1, 0], [1, 1], [1, -1]
-            ];
-            for (let [dx, dy] of directions) {
-                let count = 1;
-                let blocked = 0;
-                for (let i = 1; i < winLength; i++) {
-                    let newRow = row + i * dx;
-                    let newCol = col + i * dy;
-                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
-                        blocked++;
-                        break;
-                    }
-                    if (board[newRow][newCol] === player) {
-                        count++;
-                    } else if (board[newRow][newCol] !== '') {
-                        blocked++;
-                        break;
-                    } else {
-                        break;
-                    }
-                }
-                for (let i = 1; i < winLength; i++) {
-                    let newRow = row - i * dx;
-                    let newCol = col - i * dy;
-                    if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) {
-                        blocked++;
-                        break;
-                    }
-                    if (board[newRow][newCol] === player) {
-                        count++;
-                    } else if (board[newRow][newCol] !== '') {
-                        blocked++;
-                        break;
-                    } else {
-                        break;
-                    }
-                }
-                score += getScore(count, blocked);
-            }
-            return score;
-        }
-
-        function getScore(count, blocked) {
-            if (count >= winLength) return 10000;
-            if (blocked === 2) return 0;
-            switch (count) {
-                case 4: return blocked === 0 ? 1000 : 100;
-                case 3: return blocked === 0 ? 100 : 10;
-                case 2: return blocked === 0 ? 10 : 1;
-                default: return 1;
-            }
-        }
-
-        function updateCell(row, col) {
-            const cellIndex = row * boardSize + col;
-            const cell = document.querySelectorAll('.cell')[cellIndex];
-            cell.textContent = board[row][col];
-            cell.classList.add(board[row][col] === 'X' ? 'player-x' : 'player-o');
-        }
-
-        function checkWin(player) {
-            const directions = [
-                [0, 1], [1, 0], [1, 1], [1, -1]
-            ];
-            for (let row = 0; row < boardSize; row++) {
-                for (let col = 0; col < boardSize; col++) {
-                    if (board[row][col] === player) {
-                        for (let [dx, dy] of directions) {
-                            let count = 1;
-                            let line = [{ row, col }];
-                            for (let i = 1; i < winLength; i++) {
-                                let newRow = row + i * dx;
-                                let newCol = col + i * dy;
-                                if (newRow < 0 || newRow >= boardSize || newCol < 0 || newCol >= boardSize) break;
-                                if (board[newRow][newCol] === player) {
-                                    count++;
-                                    line.push({ row: newRow, col: newCol });
-                                } else {
-                                    break;
-                                }
-                            }
-                            if (count === winLength) {
-                                winningLine = line;
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        function checkDraw() {
-            return board.every(row => row.every(cell => cell !== ''));
-        }
-
-        function endGame(message) {
-            gameActive = false;
-            status.textContent = message;
-            drawWinningLine();
-        }
-
-        function resetGame() {
-            board = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
-            currentPlayer = 'X';
-            gameActive = true;
-            isComputerThinking = false;
-            status.textContent = '';
-            currentPlayerDisplay.textContent = currentPlayer;
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('player-x', 'player-o');
+        // Show section
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
             });
-            if (winningLine) {
-                const line = document.querySelector('.winning-line');
-                if (line) line.remove();
-                winningLine = null;
-            }
+
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-indigo-100', 'text-indigo-700');
+            });
+            event.target.closest('.nav-item').classList.add('bg-indigo-100', 'text-indigo-700');
         }
 
-        function drawWinningLine() {
-            if (!winningLine) return;
-            const start = winningLine[0];
-            const end = winningLine[winningLine.length - 1];
-            const line = document.createElement('div');
-            line.classList.add('winning-line');
-            const startCell = document.querySelectorAll('.cell')[start.row * boardSize + start.col];
-            const endCell = document.querySelectorAll('.cell')[end.row * boardSize + end.col];
-            const startRect = startCell.getBoundingClientRect();
-            const endRect = endCell.getBoundingClientRect();
-            const gameboardRect = gameBoard.getBoundingClientRect();
-            const length = Math.sqrt(Math.pow(endRect.left - startRect.left, 2) + Math.pow(endRect.top - startRect.top, 2));
-            const angle = Math.atan2(endRect.top - startRect.top, endRect.left - startRect.left);
-            line.style.width = `${length}px`;
-            line.style.height = '4px';
-            line.style.left = `${startRect.left + startRect.width / 2 - gameboardRect.left}px`;
-            line.style.top = `${startRect.top + startRect.height / 2 - gameboardRect.top}px`;
-            line.style.transform = `rotate(${angle}rad)`;
-            line.style.transformOrigin = 'top left';
-            line.style.position = 'absolute';
-            gameBoard.appendChild(line);
+        // Toggle submenu
+        function toggleSubmenu(submenuId) {
+            const submenu = document.getElementById(submenuId + '-submenu');
+            submenu.classList.toggle('hidden');
         }
 
-        // Ensure you have a reset button in your HTML
-        document.getElementById('resetButton').addEventListener('click', resetGame);
-
-        // Initialize the game when the page loads
+        // Set default active section
         document.addEventListener('DOMContentLoaded', function () {
-            createBoard();
+            showSection('dashboard');
         });
     </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'98e5f3eaf4808129',t:'MTc2MDQzMzEyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>
