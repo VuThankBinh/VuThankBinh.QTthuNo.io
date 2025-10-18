@@ -86,7 +86,12 @@
                     <a href="#" onclick="showSection('dashboard')"
                         class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
                         <i class="fas fa-chart-dashboard w-5 h-5 mr-3"></i>
-                        <span>Dashboard & Báo cáo</span>
+                        <span>Tổng quan</span>
+                    </a>
+                    <a href="#" onclick="showSection('dashboard-report')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-chart-dashboard w-5 h-5 mr-3"></i>
+                        <span>Báo cáo</span>
                     </a>
                     <a href="#" onclick="showSection('loans')"
                         class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
@@ -131,6 +136,11 @@
                         class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
                         <i class="fas fa-shield-alt w-5 h-5 mr-3"></i>
                         <span>Phân quyền & Audit</span>
+                    </a>
+                    <a href="#" onclick="showSection('dashboard-report')"
+                        class="nav-item flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
+                        <i class="fas fa-file-alt w-5 h-5 mr-3"></i>
+                        <span>Báo cáo quản trị (Linh)</span>
                     </a>
                 </div>
             </nav>
@@ -214,288 +224,8 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Reports Section -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900">Báo cáo chi tiết</h3>
-                        <div class="flex gap-3">
-                            <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                <i class="fas fa-file-excel mr-2"></i>Export Excel
-                            </button>
-                            <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                                <i class="fas fa-file-pdf mr-2"></i>Export PDF
-                            </button>
-                            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                                <i class="fas fa-cog mr-2"></i>Tùy chỉnh báo cáo
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Report Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Loại báo cáo</label>
-                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option>Báo cáo tổng hợp</option>
-                                <option>Báo cáo theo collector</option>
-                                <option>Báo cáo theo khu vực</option>
-                                <option>Báo cáo hiệu suất</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kỳ báo cáo</label>
-                            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option>Hôm nay</option>
-                                <option>Tuần này</option>
-                                <option>Tháng này</option>
-                                <option>Quý này</option>
-                                <option>Năm này</option>
-                                <option>Tùy chỉnh</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Từ ngày</label>
-                            <input type="date" value="2024-12-01" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Đến ngày</label>
-                            <input type="date" value="2024-12-31" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div class="flex items-end">
-                            <button class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                                <i class="fas fa-search mr-2"></i>Tạo báo cáo
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Report Summary Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Tổng số khoản vay</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1">1,234</p>
-                                    <p class="text-xs text-green-600 mt-1">
-                                        <i class="fas fa-arrow-up"></i> +5.2% so với tháng trước
-                                    </p>
-                                </div>
-                                <div class="bg-blue-100 p-3 rounded-full">
-                                    <i class="fas fa-file-invoice text-blue-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Tổng số tiền thu</p>
-                                    <p class="text-2xl font-bold text-green-600 mt-1">1.8 tỷ</p>
-                                    <p class="text-xs text-green-600 mt-1">
-                                        <i class="fas fa-arrow-up"></i> +12.5%
-                                    </p>
-                                </div>
-                                <div class="bg-green-100 p-3 rounded-full">
-                                    <i class="fas fa-dollar-sign text-green-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Số cuộc gọi</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1">3,456</p>
-                                    <p class="text-xs text-red-600 mt-1">
-                                        <i class="fas fa-arrow-down"></i> -2.3%
-                                    </p>
-                                </div>
-                                <div class="bg-orange-100 p-3 rounded-full">
-                                    <i class="fas fa-phone text-orange-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Hiệu suất trung bình</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1">85.3%</p>
-                                    <p class="text-xs text-green-600 mt-1">
-                                        <i class="fas fa-arrow-up"></i> +3.1%
-                                    </p>
-                                </div>
-                                <div class="bg-purple-100 p-3 rounded-full">
-                                    <i class="fas fa-chart-line text-purple-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Report Table -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Collector
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Số khoản được giao
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Số khoản thu hồi
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tổng tiền thu
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Số cuộc gọi
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tỷ lệ thành công
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Hiệu suất
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-semibold">
-                                                    CA
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">Collector A</div>
-                                                <div class="text-sm text-gray-500">collector.a@company.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">145</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">123</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">450,000,000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">892</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <span class="text-sm font-semibold text-gray-900">84.8%</span>
-                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
-                                                <div class="bg-green-500 h-2 rounded-full" style="width: 84.8%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                            Xuất sắc
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold">
-                                                    CB
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">Collector B</div>
-                                                <div class="text-sm text-gray-500">collector.b@company.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">132</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">98</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">380,000,000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">756</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <span class="text-sm font-semibold text-gray-900">74.2%</span>
-                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
-                                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 74.2%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                            Tốt
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-semibold">
-                                                    CC
-                                                </div>
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">Collector C</div>
-                                                <div class="text-sm text-gray-500">collector.c@company.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">128</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">89</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">320,000,000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">684</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <span class="text-sm font-semibold text-gray-900">69.5%</span>
-                                            <div class="ml-2 w-16 bg-gray-200 rounded-full h-2">
-                                                <div class="bg-orange-500 h-2 rounded-full" style="width: 69.5%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
-                                            Trung bình
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50 bg-gray-50 font-semibold">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <i class="fas fa-calculator mr-2"></i>TỔNG CỘNG
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">405</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">310</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">1,150,000,000 VNĐ</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2,332</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">76.5%</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                            Trung bình
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Chart Section in Report -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h4 class="text-sm font-semibold text-gray-900 mb-3">Hiệu suất theo Collector</h4>
-                            <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-chart-bar text-3xl text-gray-400 mb-2"></i>
-                                    <p class="text-sm text-gray-500">Biểu đồ cột so sánh hiệu suất</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h4 class="text-sm font-semibold text-gray-900 mb-3">Tỷ lệ thu hồi theo khu vực</h4>
-                            <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
-                                <div class="text-center">
-                                    <i class="fas fa-map-marked-alt text-3xl text-gray-400 mb-2"></i>
-                                    <p class="text-sm text-gray-500">Bản đồ nhiệt khu vực</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
+            <!-- Report Section -->
 
             <!-- Loans Section -->
             <div id="loans" class="section hidden">
@@ -802,6 +532,210 @@
                     <p class="text-gray-500 text-center py-8">Chức năng phân quyền và audit đang được phát triển...</p>
                 </div>
             </div>
+
+            <!-- Dashboard Report Section -->
+            <div id="dashboard-report" class="section hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Báo cáo quản trị</h2>
+                    <p class="text-gray-600">Báo cáo quản trị theo yêu cầu của chị Linh</p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="border-b border-gray-200">
+                        <nav class="flex -mb-px" role="tablist">
+                            <button onclick="switchReportTab('tab1')" 
+                                class="report-tab active px-6 py-4 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600 focus:outline-none">
+                                Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm
+                            </button>
+                            <button onclick="switchReportTab('tab2')" 
+                                class="report-tab px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
+                                Báo cáo danh sách khách hàng tất toán trước hạn
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content 1: Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm -->
+                    <div id="report-tab1" class="tab-content p-6">
+                        <!-- Filters -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-1"></i>Từ ngày
+                                </label>
+                                <input type="date" value="2024-12-01"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-1"></i>Đến ngày
+                                </label>
+                                <input type="date" value="2024-12-31"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái cầm cố</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option>Tất cả</option>
+                                    <option>Đang cầm cố</option>
+                                    <option>Đã thanh lý</option>
+                                    <option>Chờ xử lý</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-search mr-2"></i>Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full border-collapse border border-gray-300">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">STT</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Mã KH</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Tên KH</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Dư nợ</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Số sổ tiết kiệm</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Ngày vay</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Ngày đến hạn</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">1</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH001</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Nguyễn Văn A</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">50,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">123456789</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">15/10/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">15/10/2025</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">2</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH002</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Trần Thị B</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">30,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">987654321</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">20/11/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">20/11/2025</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">3</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH003</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Lê Văn C</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">75,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">456789123</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">05/12/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">05/12/2025</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Download Button -->
+                        <div class="flex justify-end">
+                            <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-download mr-2"></i>Tải xuống
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content 2: Báo cáo danh sách khách hàng tất toán trước hạn -->
+                    <div id="report-tab2" class="tab-content p-6 hidden">
+                        <!-- Filters -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-1"></i>Từ ngày
+                                </label>
+                                <input type="date" value="2024-12-01"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-calendar mr-1"></i>Đến ngày
+                                </label>
+                                <input type="date" value="2024-12-31"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Lý do tất toán</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option>Tất cả</option>
+                                    <option>Khách hàng yêu cầu</option>
+                                    <option>Hết hạn hợp đồng</option>
+                                    <option>Vi phạm điều khoản</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-search mr-2"></i>Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto mb-4">
+                            <table class="w-full border-collapse border border-gray-300">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">STT</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Mã khách hàng</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Tên khách hàng</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Số sổ tiết kiệm</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Số tiền tất toán</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Ngày tất toán</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Ngày đến hạn gốc</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border border-gray-300">Lý do tất toán</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">1</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH004</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Phạm Văn D</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">111222333</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">45,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">10/12/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">15/01/2025</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Khách hàng yêu cầu</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">2</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH005</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Hoàng Thị E</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">444555666</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">60,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">05/12/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">20/02/2025</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Hết hạn hợp đồng</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300 text-center">3</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">KH006</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Vũ Văn F</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">777888999</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">35,000,000 VNĐ</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">01/12/2024</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">10/03/2025</td>
+                                        <td class="px-4 py-3 text-sm text-gray-900 border border-gray-300">Vi phạm điều khoản</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Download Button -->
+                        <div class="flex justify-end">
+                            <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-download mr-2"></i>Tải xuống
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -842,6 +776,25 @@
         function toggleSubmenu(submenuId) {
             const submenu = document.getElementById(submenuId + '-submenu');
             submenu.classList.toggle('hidden');
+        }
+
+        // Switch report tabs
+        function switchReportTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Show selected tab
+            document.getElementById('report-' + tabId).classList.remove('hidden');
+
+            // Update tab button states
+            document.querySelectorAll('.report-tab').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'text-indigo-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-indigo-600', 'text-indigo-600');
         }
 
         // Set default active section
