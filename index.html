@@ -540,23 +540,20 @@
                     <p class="text-gray-600">Báo cáo quản trị theo yêu cầu của chị Linh</p>
                 </div>
 
-                <!-- Tabs -->
-                <div class="bg-white rounded-xl shadow-sm">
-                    <div class="border-b border-gray-200">
-                        <nav class="flex -mb-px" role="tablist">
-                            <button onclick="switchReportTab('tab1')" 
-                                class="report-tab active px-6 py-4 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600 focus:outline-none">
-                                Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm
-                            </button>
-                            <button onclick="switchReportTab('tab2')" 
-                                class="report-tab px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none">
-                                Báo cáo danh sách khách hàng tất toán trước hạn
-                            </button>
-                        </nav>
+                <!-- Report Content -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <!-- Report Type Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Chọn loại báo cáo</label>
+                        <select id="reportType" onchange="switchReportType()" 
+                            class="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="mortgage">Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm</option>
+                            <option value="settlement">Báo cáo danh sách khách hàng tất toán trước hạn</option>
+                        </select>
                     </div>
 
-                    <!-- Tab Content 1: Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm -->
-                    <div id="report-tab1" class="tab-content p-6">
+                    <!-- Report Content 1: Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm -->
+                    <div id="report-mortgage" class="report-content">
                         <!-- Filters -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <div>
@@ -643,8 +640,8 @@
                         </div>
                     </div>
 
-                    <!-- Tab Content 2: Báo cáo danh sách khách hàng tất toán trước hạn -->
-                    <div id="report-tab2" class="tab-content p-6 hidden">
+                    <!-- Report Content 2: Báo cáo danh sách khách hàng tất toán trước hạn -->
+                    <div id="report-settlement" class="report-content hidden">
                         <!-- Filters -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <div>
@@ -778,23 +775,21 @@
             submenu.classList.toggle('hidden');
         }
 
-        // Switch report tabs
-        function switchReportTab(tabId) {
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
+        // Switch report type
+        function switchReportType() {
+            const reportType = document.getElementById('reportType').value;
+            
+            // Hide all report contents
+            document.querySelectorAll('.report-content').forEach(content => {
+                content.classList.add('hidden');
             });
 
-            // Show selected tab
-            document.getElementById('report-' + tabId).classList.remove('hidden');
-
-            // Update tab button states
-            document.querySelectorAll('.report-tab').forEach(btn => {
-                btn.classList.remove('border-indigo-600', 'text-indigo-600');
-                btn.classList.add('border-transparent', 'text-gray-500');
-            });
-            event.target.classList.remove('border-transparent', 'text-gray-500');
-            event.target.classList.add('border-indigo-600', 'text-indigo-600');
+            // Show selected report content
+            if (reportType === 'mortgage') {
+                document.getElementById('report-mortgage').classList.remove('hidden');
+            } else if (reportType === 'settlement') {
+                document.getElementById('report-settlement').classList.remove('hidden');
+            }
         }
 
         // Set default active section
