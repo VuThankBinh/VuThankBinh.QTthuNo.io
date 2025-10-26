@@ -472,14 +472,224 @@
                 </div>
             </div>
 
-            <!-- Other sections would be implemented similarly -->
+            <!-- Tất toán Bắt buộc Section -->
             <div id="approval" class="section hidden">
                 <div class="mb-6">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Phê duyệt Tất toán</h2>
-                    <p class="text-gray-600">Xử lý các yêu cầu tất toán bắt buộc từ khách hàng</p>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Tất toán Bắt buộc</h2>
+                    <p class="text-gray-600">Giải phong tỏa, tất toán và cập nhật trạng thái sổ tiết kiệm</p>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <p class="text-gray-500 text-center py-8">Chức năng phê duyệt tất toán đang được phát triển...</p>
+
+                <!-- Customer Search -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Tìm kiếm khách hàng</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Số sổ tiết kiệm / Mã khách hàng</label>
+                            <input type="text" id="searchCustomer" placeholder="Nhập số sổ tiết kiệm hoặc mã KH"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="searchCustomer()"
+                                class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Tìm kiếm
+                            </button>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="resetForm()"
+                                class="w-full bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors">
+                                <i class="fas fa-redo mr-2"></i>Làm mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                                 <!-- Customer Information -->
+                 <div id="customerInfo">
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Thông tin khách hàng</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <span class="text-sm text-gray-600">Mã khách hàng:</span>
+                                <p class="font-medium" id="customerCode">KH001</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Tên khách hàng:</span>
+                                <p class="font-medium" id="customerName">Nguyễn Văn A</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Số điện thoại:</span>
+                                <p class="font-medium" id="customerPhone">0901234567</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Số sổ tiết kiệm:</span>
+                                <p class="font-medium" id="savingsAccount">123456789</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Số dư nợ:</span>
+                                <p class="font-medium text-red-600" id="loanAmount">50,000,000 VNĐ</p>
+                            </div>
+                            <div>
+                                <span class="text-sm text-gray-600">Trạng thái hiện tại:</span>
+                                <p class="font-medium">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full status-warning">Đang phong tỏa</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settlement Process Steps -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Quy trình tất toán bắt buộc</h3>
+                        
+                        <!-- Step 1: Giải phong tỏa -->
+                        <div class="border border-gray-200 rounded-lg p-6 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-bold mr-4">
+                                    1
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Giải phong tỏa sổ tiết kiệm</h4>
+                            </div>
+                            <div class="ml-14 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Lý do giải phong tỏa</label>
+                                    <select id="unblockReason"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Chọn lý do</option>
+                                        <option value="customer-request">Khách hàng yêu cầu</option>
+                                        <option value="force-settlement">Tất toán bắt buộc</option>
+                                        <option value="overdue">Quá hạn thanh toán</option>
+                                        <option value="other">Lý do khác</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
+                                    <textarea id="unblockNote" rows="2"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="Nhập ghi chú..."></textarea>
+                                </div>
+                                <button onclick="processStep('unblock')"
+                                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    <i class="fas fa-unlock mr-2"></i>Giải phong tỏa
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Tất toán -->
+                        <div class="border border-gray-200 rounded-lg p-6 mb-6">
+                            <div class="flex items-center mb-4">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 font-bold mr-4">
+                                    2
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Tất toán sổ tiết kiệm</h4>
+                                <span id="step2Status" class="ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-600">Chưa thực hiện</span>
+                            </div>
+                            <div class="ml-14 space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Số tiền tất toán</label>
+                                        <input type="text" id="settlementAmount" readonly
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                                            value="45,000,000 VNĐ">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Số tiền gốc</label>
+                                        <input type="text" id="principalAmount" readonly
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                                            value="100,000,000 VNĐ">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Lãi suất</label>
+                                        <input type="text" id="interestRate" readonly
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                                            value="6.0% / năm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Thời hạn còn lại</label>
+                                        <input type="text" id="remainingTerm" readonly
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50"
+                                            value="8 tháng">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phương thức thanh toán</label>
+                                    <select id="paymentMethod"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="auto-debit">Trích nợ tự động</option>
+                                        <option value="transfer">Chuyển khoản</option>
+                                        <option value="cash">Tiền mặt</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Lý do tất toán</label>
+                                    <textarea id="settlementReason" rows="2"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="Nhập lý do tất toán..."></textarea>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="confirmSettlement" class="mr-2 rounded">
+                                    <label for="confirmSettlement" class="text-sm text-gray-700">
+                                        Xác nhận đã kiểm tra thông tin tất toán
+                                    </label>
+                                </div>
+                                <button onclick="processStep('settlement')"
+                                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                    disabled id="btnSettlement">
+                                    <i class="fas fa-calculator mr-2"></i>Thực hiện tất toán
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Cập nhật trạng thái -->
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 font-bold mr-4">
+                                    3
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Cập nhật trạng thái</h4>
+                                <span id="step3Status" class="ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-600">Chưa thực hiện</span>
+                            </div>
+                            <div class="ml-14 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái mới</label>
+                                    <select id="newStatus"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Chọn trạng thái</option>
+                                        <option value="settled">Đã tất toán</option>
+                                        <option value="closed">Đã đóng</option>
+                                        <option value="transferred">Đã chuyển</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Mô tả thay đổi</label>
+                                    <textarea id="statusNote" rows="2"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="Mô tả lý do thay đổi trạng thái..."></textarea>
+                                </div>
+                                <button onclick="processStep('update')"
+                                    class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                    disabled id="btnUpdate">
+                                    <i class="fas fa-save mr-2"></i>Cập nhật trạng thái
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction History -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Lịch sử giao dịch</h3>
+                        <div class="space-y-3">
+                            <div class="border-l-4 border-gray-300 pl-4 py-2">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-gray-900">Khởi tạo tất toán bắt buộc</p>
+                                        <p class="text-sm text-gray-600 mt-1">Hệ thống khởi tạo yêu cầu tất toán bắt buộc</p>
+                                        <p class="text-xs text-gray-500 mt-1">Người thực hiện: Hệ thống</p>
+                                    </div>
+                                    <span class="text-sm text-gray-600">20/12/2024 14:30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -545,7 +755,7 @@
                     <!-- Report Type Selection -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Chọn loại báo cáo</label>
-                        <select id="reportType" onchange="switchReportType()" 
+                        <select id="reportType" onchange="switchReportType();" 
                             class="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="mortgage">Báo cáo danh sách khách hàng cầm cố Sổ tiết kiệm</option>
                             <option value="settlement">Báo cáo danh sách khách hàng tất toán trước hạn</option>
@@ -841,6 +1051,186 @@
                 document.getElementById('report-settlement').classList.remove('hidden');
             }
         }
+
+        // Settlement Functions
+        let currentStep = 0;
+
+        function searchCustomer() {
+            const searchValue = document.getElementById('searchCustomer').value;
+            if (searchValue.trim() === '') {
+                alert('Vui lòng nhập số sổ tiết kiệm hoặc mã khách hàng');
+                return;
+            }
+            
+            // Show customer info
+            document.getElementById('customerInfo').classList.remove('hidden');
+            
+            // Reset steps
+            resetSteps();
+        }
+
+        function resetForm() {
+            document.getElementById('searchCustomer').value = '';
+            document.getElementById('customerInfo').classList.add('hidden');
+            resetSteps();
+        }
+
+        function resetSteps() {
+            currentStep = 0;
+            
+            // Reset step 1
+            document.getElementById('unblockReason').value = '';
+            document.getElementById('unblockNote').value = '';
+            
+            // Reset step 2
+            document.getElementById('paymentMethod').value = 'auto-debit';
+            document.getElementById('settlementReason').value = '';
+            document.getElementById('confirmSettlement').checked = false;
+            document.getElementById('btnSettlement').disabled = true;
+            document.getElementById('step2Status').textContent = 'Chưa thực hiện';
+            document.getElementById('step2Status').className = 'ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-600';
+            
+            // Reset step 3
+            document.getElementById('newStatus').value = '';
+            document.getElementById('statusNote').value = '';
+            document.getElementById('btnUpdate').disabled = true;
+            document.getElementById('step3Status').textContent = 'Chưa thực hiện';
+            document.getElementById('step3Status').className = 'ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-600';
+        }
+
+        function processStep(step) {
+            if (step === 'unblock') {
+                const reason = document.getElementById('unblockReason').value;
+                if (!reason) {
+                    alert('Vui lòng chọn lý do giải phong tỏa');
+                    return;
+                }
+                
+                // Show confirmation
+                if (confirm('Bạn có chắc chắn muốn giải phong tỏa sổ tiết kiệm?')) {
+                    // Success
+                    currentStep = 1;
+                    
+                    // Enable step 2
+                    document.getElementById('btnSettlement').disabled = false;
+                    document.getElementById('step2Status').textContent = 'Sẵn sàng';
+                    document.getElementById('step2Status').className = 'ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700';
+                    
+                    // Update step 1 visual
+                    const step1Circle = document.querySelector('.border.border-gray-200.rounded-lg.p-6.mb-6 .w-10.h-10');
+                    step1Circle.className = 'flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600 font-bold mr-4';
+                    
+                    alert('Giải phong tỏa thành công! Bạn có thể tiếp tục với bước tất toán.');
+                    
+                    // Add transaction history
+                    addTransactionHistory('Giải phong tỏa sổ tiết kiệm', 'Đã giải phong tỏa thành công');
+                }
+                
+            } else if (step === 'settlement') {
+                const confirmCheck = document.getElementById('confirmSettlement').checked;
+                if (!confirmCheck) {
+                    alert('Vui lòng xác nhận đã kiểm tra thông tin tất toán');
+                    return;
+                }
+                
+                // Show confirmation
+                if (confirm('Bạn có chắc chắn muốn thực hiện tất toán sổ tiết kiệm?')) {
+                    // Success
+                    currentStep = 2;
+                    
+                    // Enable step 3
+                    document.getElementById('btnUpdate').disabled = false;
+                    document.getElementById('step3Status').textContent = 'Sẵn sàng';
+                    document.getElementById('step3Status').className = 'ml-4 px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700';
+                    
+                    // Update step 2 visual
+                    const step2Circle = document.querySelectorAll('.border.border-gray-200.rounded-lg.p-6.mb-6 .w-10.h-10')[1];
+                    step2Circle.className = 'flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600 font-bold mr-4';
+                    
+                    alert('Tất toán thành công! Bạn có thể cập nhật trạng thái.');
+                    
+                    // Add transaction history
+                    addTransactionHistory('Tất toán sổ tiết kiệm', 'Đã tất toán thành công');
+                }
+                
+            } else if (step === 'update') {
+                const newStatus = document.getElementById('newStatus').value;
+                if (!newStatus) {
+                    alert('Vui lòng chọn trạng thái mới');
+                    return;
+                }
+                
+                // Show confirmation
+                if (confirm('Bạn có chắc chắn muốn cập nhật trạng thái?')) {
+                    // Success
+                    currentStep = 3;
+                    
+                    // Update step 3 visual
+                    const step3Circle = document.querySelectorAll('.border.border-gray-200.rounded-lg.p-6 .w-10.h-10')[2];
+                    step3Circle.className = 'flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600 font-bold mr-4';
+                    
+                    alert('Cập nhật trạng thái thành công! Quy trình tất toán bắt buộc đã hoàn tất.');
+                    
+                    // Add transaction history
+                    addTransactionHistory('Cập nhật trạng thái', 'Đã cập nhật trạng thái: ' + newStatus);
+                    
+                    // Show completion message
+                    showCompletionMessage();
+                }
+            }
+        }
+
+        function addTransactionHistory(title, description) {
+            const historyContainer = document.querySelector('.bg-white.rounded-xl.shadow-sm.p-6:last-child .space-y-3');
+            const now = new Date();
+            const dateStr = now.getDate() + '/' + (now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + 
+                          now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            
+            const historyItem = document.createElement('div');
+            historyItem.className = 'border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-50 rounded-r-lg';
+            historyItem.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-medium text-gray-900">${title}</p>
+                        <p class="text-sm text-gray-600 mt-1">${description}</p>
+                        <p class="text-xs text-gray-500 mt-1">Người thực hiện: Admin User</p>
+                    </div>
+                    <span class="text-sm text-gray-600">${dateStr}</span>
+                </div>
+            `;
+            
+            historyContainer.insertBefore(historyItem, historyContainer.firstChild);
+        }
+
+        function showCompletionMessage() {
+            // You can customize this to show a modal or notification
+            const message = document.createElement('div');
+            message.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+            message.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2 text-2xl"></i>
+                    <div>
+                        <p class="font-semibold">Hoàn tất tất toán bắt buộc!</p>
+                        <p class="text-sm">Tất cả các bước đã được thực hiện thành công.</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+
+        // Enable checkbox event for step 2
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmCheck = document.getElementById('confirmSettlement');
+            if (confirmCheck) {
+                confirmCheck.addEventListener('change', function() {
+                    // This is handled in the global scope
+                });
+            }
+        });
 
         // Set default active section
         document.addEventListener('DOMContentLoaded', function () {
